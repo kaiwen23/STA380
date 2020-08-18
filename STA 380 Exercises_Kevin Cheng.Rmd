@@ -57,27 +57,27 @@ First, I looked into the distribution of leasing rate of green buildings and non
 ```{r, echo=FALSE}
 #plot subset (non_green_buildings))
 hist(non_green_buildings$leasing_rate, 
-     col=c('red', rep('grey',9)),
-     main = "Histogram for Occupancy", 
+     col= "darkslategray1",
+     main = "Occupancy", 
      xlab = "Leasing Rate")
 
 #plot subset (green_buildings)
-hist(green_buildings$leasing_rate, col="lightgreen", add=TRUE)
+hist(green_buildings$leasing_rate, col="lightgreen", type= "count", add=TRUE)
 
 legend("topleft",
        legend=c('Non-Green buildings','Green buildings'),
        pch=c(15,15),
-       col=c('grey','lightgreen'))
+       col=c('darkslategray1','lightgreen'))
 ```
 
 Second, the leasing rate for green buildings is highly left-skewed, so the median is a better estimation for building, which is 92.9%.  
 ``` {r, echo=FALSE}
 d <- density(buildings$Rent)
-plot(d, main="Rent Density (All Buildings)", xlab=("Annual Rent  ($ / sqft)"))
+plot(d, main="Rent to Density", xlab=("Rent"))
 # polygon(d, col="lightgrey")
 
-abline(v=median(buildings$Rent),col='firebrick',lwd=2)
-abline(v=mean(buildings$Rent),col='cyan4',lwd=2)
+abline(v=median(buildings$Rent),col='mediumorchid1',lwd=3)
+abline(v=mean(buildings$Rent),col='orange',lwd=3)
 
 # abline(v=median(non_green_buildings$Rent),col='grey',lwd=2)
 # abline(v=median(green_buildings$Rent),col='lightgreen',lwd=2)
@@ -85,7 +85,7 @@ abline(v=mean(buildings$Rent),col='cyan4',lwd=2)
 legend("topright", cex=0.7,
        legend=c('Median Rent','Mean Rent'),
        lty=c(1,1), lwd=c(2,2),
-       col=c('firebrick','cyan4'))
+       col=c('mediumorchid1','orange'))
 ```
 
 Third, the way the author calculates the premium rent for green buildings is too generic as there are confounding variables. With these confounding variables, we are not sure how the green rating directly influences the rent. Age is one of the confounding variables. As shown in the plot, green buildings are highly concentrated in the lower range of age, which means they are relatively new, thus having higher rent.   
@@ -140,16 +140,16 @@ flight$Dahead=ifelse(flight$DepDelay<=0,-flight$DepDelay,NA)
 
 ```{r types of delay, echo=FALSE}
 ggplot(flight, aes(x=Month, na.rm = TRUE, colour = Type)) + 
-  geom_line(aes(y = LateAircraftDelay, colour="Late Aircraft Delay"), stat = "summary", fun.y = "mean", na.rm = TRUE) + 
-  geom_line(aes(y = SecurityDelay, colour = "Security Delay"), stat = "summary", fun.y = "mean", na.rm = TRUE) +
-  geom_line(aes(y = NASDelay, colour = "NAS Delay"), stat = "summary", fun.y = "mean", na.rm = TRUE) +
-  geom_line(aes(y = WeatherDelay, colour = "Weather Delay"), stat = "summary", fun.y = "mean", na.rm = TRUE) +
-  geom_line(aes(y = CarrierDelay, colour = "Carrier Delay"), stat = "summary", fun.y = "mean", na.rm = TRUE) +
-  ylab(label="Delay Time (min)") + 
+  geom_crossbar(aes(y = LateAircraftDelay, colour="Late Aircraft Delay"), stat = "summary", fun.y = "mean", na.rm = TRUE) + 
+  geom_crossbar(aes(y = SecurityDelay, colour = "Security Delay"), stat = "summary", fun.y = "mean", na.rm = TRUE) +
+  geom_crossbar(aes(y = NASDelay, colour = "NAS Delay"), stat = "summary", fun.y = "mean", na.rm = TRUE) +
+  geom_crossbar(aes(y = WeatherDelay, colour = "Weather Delay"), stat = "summary", fun.y = "mean", na.rm = TRUE) +
+  geom_crossbar(aes(y = CarrierDelay, colour = "Carrier Delay"), stat = "summary", fun.y = "mean", na.rm = TRUE) +
+  ylab(label="Delay Time") + 
   xlab("Month")+
   theme_minimal() +
   scale_x_continuous(breaks=c(1,2,3,4,5,6,7,8,9,10,11,12)) +
-  ggtitle('Average Delay Time Due to Five Types of Delay')
+  ggtitle('Five Types of Delay')
 ```
    
 According to this plot, I can see late aircraft delay is much higher than any other delay types except for September and October. Overall, The most delays occur in the winter months.    
@@ -157,25 +157,16 @@ According to this plot, I can see late aircraft delay is much higher than any ot
   
 ```{r Carrier Delay, echo=FALSE}
 #Average arrival delay and carrier delay for each Carrier  
-p5=ggplot(flight, aes(x=UniqueCarrier, y=Adelay, na.rm = TRUE))+
-  stat_summary(fun.y="mean", geom="bar",fill='lightblue', na.rm = TRUE)+
-  stat_summary(aes(label=round(..y..,2)), fun.y="mean", geom="text", size=3,vjust = -0.5,na.rm = TRUE)+
+
+p=ggplot(flight, aes(x=UniqueCarrier, y=CarrierDelay, na.rm = TRUE))+
+  stat_summary(fun.y="mean", geom="point",fill='steelblue1', na.rm = TRUE)+
   theme_minimal()+
-  ggtitle('Average arrival delay for each Carrier')+
-  xlab('Unique Carrier Code')+
-  ylab('Arrival Delay (min)')+
+  ggtitle('Average carrier delay')+
+  xlab('Carrier Code')+
+  ylab('Arrival Delay')+
   coord_cartesian(ylim=c(0,45))
 
-p6=ggplot(flight, aes(x=UniqueCarrier, y=CarrierDelay, na.rm = TRUE))+
-  stat_summary(fun.y="mean", geom="bar",fill='pink', na.rm = TRUE)+
-  stat_summary(aes(label=round(..y..,2)), fun.y="mean", geom="text", size=3,vjust = -0.5,na.rm = TRUE)+
-  theme_minimal()+
-  ggtitle('Average carrier delay for each Carrier')+
-  xlab('Unique Carrier Code')+
-  ylab('Arrival Delay (min)')+
-  coord_cartesian(ylim=c(0,45))
-
-ggarrange(p5,p6, ncol = 1, nrow = 2)
+ggarrange(p, ncol = 1, nrow = 1)
 ```
   
 From these plots I can see that the higher average arrival delay for each carrier may not be due to their own fault. Airline YV and EV have both higher average arrival delay and average carrier delay, so it may be unwise to choose from these two carriers.   AircraftDelay has the largest delay time among all types of reasons. STL also ranks the first among this group. Therefore, based on the average total delay time for different airports, We can determine that STL is the worst airport to fly in. 
@@ -183,8 +174,6 @@ From these plots I can see that the higher average arrival delay for each carrie
    
 4. Market Segmentation  
 ======================   
-  
-(a) Data Pre-Processing  
 -----------------------  
 ```{r, echo=FALSE}
 social_market = read.csv('https://raw.githubusercontent.com/jgscott/STA380/master/data/social_marketing.csv')
@@ -215,12 +204,12 @@ By looking at different outputs of different Ks, I chose k=3 as our final parame
 ```{r cluster 3, echo=FALSE}
 #hclust
 #choose cluster 3
-out.cluster = cutree(hc.ratio.cosine,k=3)
+out.cluster = cutree(hc.ratio.cosine,k=4)
 TFIDF['cluster'] = out.cluster
 tfidf<-c()
 names<-c()
 for(j in 1:3){
-    cate = sort(apply(TFIDF[TFIDF['cluster']==j,-ncol(TFIDF)],2,mean),decreasing=TRUE)[1:5]
+    cate = sort(apply(TFIDF[TFIDF['cluster']==j,-ncol(TFIDF)],2,mean),decreasing=TRUE)[1:3]
     name = names(cate)
     tfidf<-c(tfidf,unname(cate))
     names<-c(names,name)
@@ -231,7 +220,7 @@ cate.df$names<-factor(cate.df$names, levels=unique(cate.df$names))
 colourCount = length(unique(cate.df$names))
 getPalette = colorRampPalette(brewer.pal(8, "Set2"))
 
-ggplot(cate.df,mapping=aes(x=cluster,y=tfidf_scores,fill=names))+geom_bar(stat='identity',position='dodge')+theme(panel.grid.minor=element_blank(),panel.grid.major=element_blank())+scale_fill_manual(values=getPalette(colourCount))+theme_minimal()+xlab("Cluster") + ylab("TF-IDF Score")+ ggtitle("Top 5 Names for Each Cluster")
+ggplot(cate.df,mapping=aes(x=cluster,y=tfidf_scores,fill=names))+geom_bar(stat='identity',position='dodge')+theme(panel.grid.minor=element_blank(),panel.grid.major=element_blank())+scale_fill_manual(values=getPalette(colourCount))+theme_minimal()+xlab("Cluster") + ylab("TF-IDF Score")+ ggtitle("Top 3 Names for Each Cluster")
 ```
 
 From the topics of high TFIDF-socres in the clusters, I can infer that first cluster represents people who care a lot about health and fitness, mostly likely to be well-educated people and housewives; the second cluster represents college/high school students; the third cluster represents people who care about current events, most likely working people.  
@@ -471,41 +460,40 @@ Overall, the outputs of the model does give a accuracy of ~58%. Overall accuracy
 6. Association Rule Mining  
 ============================  
 ```{r groceries init, warning=FALSE, message=FALSE, include=FALSE}
-detach(package:tm, unload=TRUE)
 library(arules)  
 library(reshape)
 library(arulesViz)
 library(tidyverse)
 
 # Read in groceries from file
-groceries_raw <- read.table("https://raw.githubusercontent.com/jgscott/STA380/master/data/groceries.txt", header = FALSE, sep = ",", col.names = paste0("V",seq_len(32)), fill = TRUE)
+groceries_raw = scan("https://raw.githubusercontent.com/jgscott/STA380/master/data/groceries.txt", what = "", sep = "\n")
+head(groceries_raw)
+str(groceries_raw)
 #summary(groceries_raw)
-#attach(grocery_raw)
 ```
 
 I transform the data into a "transactions" class before applying the apriori algorithm.
 The summary of the dataset reveals the following:
 1. There are total of 9835 transactions in our dataset
 2. Whole milk is the present in 2513 baskets and is the most frequently bought item
-3. More than half of the transactions have 4 or lesser items per basket
 
 ```{r echo=FALSE, include=FALSE}
 ## Process the data and cast it as a "transactions" class
 groceries = strsplit(groceries_raw, ",")
 groctrans = as(groceries, "transactions")
-summary(groctrans)
+#summary(groctrans)
 ```
 
 ```{r echo=FALSE}
-itemFrequencyPlot(groctrans, topN = 20)
+itemFrequencyPlot(groctrans, topN = 10)
 ```
 
-**Let's explore rules with support > 0.05, confidence > 0.1 and length <= 2 using the 'apriori' algorithm**
-There are only 6 rules generated because of the high support and low confidence level. We also notice that most relationships in this item set include whole milk, yogurt and rolls/buns which is in accordance with the transaction frequency plot we saw earlier. These are some of the most frequently bought items.
+**Let's explore rules with support > 0.05, confidence > 0.2 and length <= 2 using the 'apriori' algorithm**
+We also notice that most relationships in this item set include whole milk, yogurt and rolls/buns which is in accordance with the transaction frequency plot we saw earlier. These are some of the most frequently bought items.
 
 ```{r echo=FALSE, include=FALSE}
 grocrules_1 = apriori(groctrans, 
-                     parameter=list(support=0.05, confidence=.1, minlen=2))
+                     parameter=list(support=0.05, confidence=.2, minlen=2))
 ```
 
 ```{r echo=FALSE}
@@ -513,13 +501,13 @@ arules::inspect(grocrules_1)
 plot(grocrules_1, method='graph')
 ```
 
-**Let's decrease support further and increase confidence slightly with support > 0.02, confidence > 0.2 and length <= 2**
+**Let's decrease support further and increase confidence slightly with support > 0.03, confidence > 0.3 and length <= 2**
 
-This item set contains 72 rules and includes a lot more items. However, whole milk still seems to be a common occurence.
+This item set contains 14 rules and includes a lot more items. However, whole milk still seems to be a common item.
 
 ```{r echo=FALSE, include=FALSE}
 grocrules_2 = apriori(groctrans, 
-                     parameter=list(support=0.02, confidence=.2, minlen=2))
+                     parameter=list(support=0.03, confidence=.3, minlen=2))
 arules::inspect(grocrules_2)
 ```
 
@@ -527,4 +515,4 @@ arules::inspect(grocrules_2)
 plot(head(grocrules_2,15,by='lift'), method='graph')
 ```
 
-In conclusion, whole milk is the most common item purchased by customers. Whole milk, yogurt, whipped cream are all often purchased together, which could be due to the close proximity to one another in a grocery store.
+In conclusion, whole milk is the most common item purchased by customers. Whole milk, yogurt, rolls/buns are all often purchased together, which could be due to the close proximity to one another in a grocery store. 
